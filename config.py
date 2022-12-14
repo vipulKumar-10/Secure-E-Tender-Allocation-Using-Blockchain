@@ -1,6 +1,6 @@
 
 ganache_URL="HTTP://127.0.0.1:7545"
-address="0x5920363A98a676785eE16cBcb0a54E7f0C32866a"
+address="0xe6D1E9837314C12Fb193fB01c51B9583F4375f89"
 
 function_info = {'Create Tender': "This function is used to create tenders and can only be called by the public administration. The         first time variable indicates how soon (seconds) the complete offers can be loaded and within       which the hash must be loaded, while the second expiry indicates in how many days (seconds)     the tender will expire.The weights indicate the importance that we want the price, the speed of execution and the environmental impact to have, their sum must be equal to 100.",
 			   'Place Bid': 'This function is used to make an offer to the tender indicated by the tender id. It can only be used by PA approved contractors. The price in euros, the execution time in days and the environmental impact (on a scale 1 to 4) must be indicated . Once the function is called, it will insert the hash of the offer in the blockchain and create a file with the information necessary to complete the offer       that will be saved in the working directory',
