@@ -103,19 +103,9 @@
 						"type": "uint256"
 					},
 					{
-						"internalType": "uint256",
-						"name": "w1",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "w2",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "w3",
-						"type": "uint256"
+						"internalType": "string",
+						"name": "_weights",
+						"type": "string"
 					}
 				],
 				"name": "CreateTender",
@@ -676,11 +666,11 @@
 			]
 		},
 		"Tendering.sol": {
-			"keccak256": "0xf4570771246f652bce16b13f9be060f1504c63529d7cf3fb0be8bfe6951e2dbe",
+			"keccak256": "0x10158e3961ca2861a710b75e44c14953aafd1ae05a3fabbfbd9c06c60ac3fee1",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://86185d5f3d0351c2531f1ff6c56a26c4d207c79b8337c1f74635bbe4db4e4efa",
-				"dweb:/ipfs/QmUhVSAuuWZL55y3NWxdhfy6ph2tMeynLugqpRaMBv5CSu"
+				"bzz-raw://10bde7cc1d40a6d7bc00e848eee21103abcc78b2e40c5ab7438ad928e0fd8a01",
+				"dweb:/ipfs/Qmdar87pwCnB5iaSmrZb5eZDdNW8on88PUA7kvDeriHc7P"
 			]
 		},
 		"https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/AccessControl.sol": {

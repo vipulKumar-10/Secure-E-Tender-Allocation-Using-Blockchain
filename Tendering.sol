@@ -40,6 +40,15 @@ contract TenderingSmartContract is PA {
         string description;
     }
 
+    struct Weights {
+        uint w1;
+        uint w2;
+        uint w3;
+        uint w4;
+        uint w5;
+        uint w6;
+    }
+
     uint[] private tenderList;
     uint private tenderKeys;
     mapping (uint => Tender) private tenders; 
@@ -82,9 +91,14 @@ contract TenderingSmartContract is PA {
 
 
     function CreateTender(string calldata _tenderName, string calldata _description,uint256 _daysUntilClosingDateData, uint256 _daysUntilClosingDateHash,
-                            uint w1, uint w2, uint w3) external onlyPA{
-        uint sum = w1.add(w2.add(w3));
+                            string calldata _weights) external onlyPA{
+        string[] memory weights = SMT(_weights, '-');
+        uint sum = parseInt(weights[0]).add(parseInt(weights[1]).add(parseInt(weights[2]).add(parseInt(weights[5]))));
         require(sum == 100, 'sum must be 100');
+        // new weight sum
+        uint sum2 = parseInt(weights[3]).add(parseInt(weights[4]));
+        require(sum2 == 100, 'Sum of two environment parameters must be 100');
+
         require(_daysUntilClosingDateData > _daysUntilClosingDateHash);
         
         Tender storage c = tenders[tenderKeys];
@@ -95,9 +109,12 @@ contract TenderingSmartContract is PA {
         c.bidSubmissionClosingDateHash= block.timestamp + (_daysUntilClosingDateHash* 1 seconds);
         c.bidSubmissionClosingDateData = block.timestamp + (_daysUntilClosingDateData* 1 seconds);
         c.tenderingInstitution = msg.sender;
-        c.evaluation_weights.push(w1);
-        c.evaluation_weights.push(w2);
-        c.evaluation_weights.push(w3);
+        c.evaluation_weights.push(parseInt(weights[0]));
+        c.evaluation_weights.push(parseInt(weights[1]));
+        c.evaluation_weights.push(parseInt(weights[2]));
+        c.evaluation_weights.push(parseInt(weights[3]));
+        c.evaluation_weights.push(parseInt(weights[4]));
+        c.evaluation_weights.push(parseInt(weights[5]));
         tenderKeys ++;
 
             }
@@ -155,24 +172,42 @@ contract TenderingSmartContract is PA {
     }
 
 
-    function adjust_measures(uint _thingToLook, uint _thingToAdjust) private pure returns(uint) {
+    function adjust_measures(uint _parameterToCompare, uint _parameterToModify) private pure returns(uint) {
 
-        uint n_times;
+        uint base;
         
-        uint _thingNew = _thingToLook;
-        while (_thingNew / (10) != 0) {
-            _thingNew = _thingNew / 10;
-            n_times ++;
+        uint _temp = _parameterToCompare;
+        while (_temp / (10) != 0) {
+            _temp = _temp / 10;
+            base++;
         }
-        return ( _thingToAdjust.mul(10 ** n_times));
+        return ( _parameterToModify.mul(10 ** base));
+    }
+
+    function environment_score(uint _firmExperience, uint _percentStrengthToNeeds, uint w4, uint w5) private pure returns(uint) {
+        uint adjustedExp = adjust_measures(_percentStrengthToNeeds, _firmExperience);
+        uint envScore = w4.mul(adjustedExp);
+        envScore = envScore.add(w5.mul(_percentStrengthToNeeds));
+
+        return envScore;
+    }
+
+    function getWeights(uint _tenderKey) private view returns(Weights memory) {
+        Weights memory w;
+        w.w1 = tenders[_tenderKey].evaluation_weights[0];
+        w.w2 = tenders[_tenderKey].evaluation_weights[1];
+        w.w3 = tenders[_tenderKey].evaluation_weights[2];
+        w.w4 = tenders[_tenderKey].evaluation_weights[3];
+        w.w5 = tenders[_tenderKey].evaluation_weights[4];
+        w.w6 = tenders[_tenderKey].evaluation_weights[5];
+
+        return w;
     }
 
     function compute_scores(uint _tenderKey) external onlyPA afterDeadline(_tenderKey) {
         require(msg.sender == tenders[_tenderKey].tenderingInstitution);
-        uint w1 = tenders[_tenderKey].evaluation_weights[0];
-        uint w2 = tenders[_tenderKey].evaluation_weights[1];
 
-        uint w3 = tenders[_tenderKey].evaluation_weights[2];
+        Weights memory w = getWeights(_tenderKey);
 
         splitDescription(_tenderKey);
 
@@ -180,14 +215,15 @@ contract TenderingSmartContract is PA {
             address  target_address = _participants[_tenderKey][i];
             BiddingOffer  memory to_store= tenders[_tenderKey].bids[target_address];
             if (to_store.valid == true){
-
-
                 uint price = parseInt(to_store.NewDescription[0]);
                 uint timing = adjust_measures(price, parseInt(to_store.NewDescription[1]));
-                uint environment = adjust_measures(price, parseInt(to_store.NewDescription[2]));
-                uint score = w1.mul(price);
-                score = score.add(w2.mul(timing));
-                score = score.add(w3.mul(environment));
+                uint environment = adjust_measures(price, environment_score(parseInt(to_store.NewDescription[2]), parseInt(to_store.NewDescription[3]), w.w4, w.w5));
+                uint previousPerformance = adjust_measures(price, parseInt(to_store.NewDescription[4]));
+
+                uint score = w.w1.mul(price);
+                score = score.add(w.w2.mul(timing));
+                score = score.add(w.w3.mul(environment));
+                score = score.add(w.w6.mul(previousPerformance));
 
                _scores[_tenderKey].push(score);
                tenders[_tenderKey].addressToScore[to_store.contractor] = score;

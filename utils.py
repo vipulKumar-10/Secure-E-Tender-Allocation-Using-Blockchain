@@ -46,15 +46,21 @@ def create_tender(web3,contract,input_dict_pa):
    --------------
    Nothing, it creates on the blockchain a new tender, error message may appear
    """
-   try:
+   try: 
        tender_name=input_dict_pa["tender name"].get()
        description=input_dict_pa["description"].get()
        n_days_1=int(input_dict_pa["n seconds to send hash"].get())
        n_days_2=int(input_dict_pa["n seconds to send file"].get())
-       weight_1_price=int(input_dict_pa["weight price"].get())
-       weight_2_time=int(input_dict_pa["weight time"].get())
-       weight_3_envir=int(input_dict_pa["weight environment"].get())
-       create_tender_solidity(web3,contract,tender_name,description,n_days_2,n_days_1,weight_1_price,weight_2_time,weight_3_envir)
+       weights = str(input_dict_pa["weight price"].get()) + '-'
+       weights = weights + str(input_dict_pa["weight time"].get) + '-'
+       weights = weights + str(input_dict_pa["weight environment"].get) + '-'
+       weights = weights + str(input_dict_pa["weight firm experience"].get) + '-'
+       weights = weights + str(input_dict_pa["weight percent strength to needs"].get) + '-'
+       weights = weights + str(input_dict_pa["weight previous performance"].get)
+    #    weight_1_price=int(input_dict_pa["weight price"].get())
+    #    weight_2_time=int(input_dict_pa["weight time"].get())
+    #    weight_3_envir=int(input_dict_pa["weight environment"].get())
+       create_tender_solidity(web3,contract,tender_name,description,n_days_2,n_days_1,weights)
        messagebox.showinfo("Create Tender", "the function has been called successfully")
 	
    except Exception as e:
@@ -62,8 +68,8 @@ def create_tender(web3,contract,input_dict_pa):
 
 
     
-def create_tender_solidity(web3,contract,tender_name,description,n_days_1,n_days_2,weight_1_price,weight_2_time,weight_3_envir):
-    contract.functions.CreateTender(tender_name,description,n_days_1,n_days_2,weight_1_price,weight_2_time,weight_3_envir).transact()
+def create_tender_solidity(web3,contract,tender_name,description,n_days_1,n_days_2,weights):
+    contract.functions.CreateTender(tender_name,description,n_days_1,n_days_2,weights).transact()
  
 def allowed_companies_ids(web3,contract,input_dict):
    """
@@ -90,16 +96,25 @@ def allowed_companies_ids(web3,contract,input_dict):
 		
 
 def assign_winner(web3,contract,input_dict):
-    try:
-        tender_id=int(input_dict["tender id"].get())
-        contract.functions.compute_scores(tender_id).transact()
-        contract.functions.assign_winner(tender_id).transact()
-        winning_address,score=contract.functions.displayWinner(tender_id).call()
-        messagebox.showinfo("Assign Winner", "The winner of the tender has been appointed")
-        return web3.eth.accounts.index(winning_address)
-    except Exception as e:
-        messagebox.showerror("Allowed Companies", str(e)+ " You might not have the permission to call this function or the Tender is not closed yet")
-    
+    tender_id=int(input_dict["tender id"].get())
+    contract.functions.compute_scores(tender_id).transact()
+    contract.functions.assign_winner(tender_id).transact()
+    winning_address,score=contract.functions.displayWinner(tender_id).call()
+    print(winning_address + " : " + score)
+    messagebox.showinfo("Assign Winner", "The winner of the tender has been appointed")
+    return web3.eth.accounts.index(winning_address)
+    # try:
+    #     tender_id=int(input_dict["tender id"].get())
+    #     contract.functions.compute_scores(tender_id).transact()
+    #     contract.functions.assign_winner(tender_id).transact()
+    #     winning_address,score=contract.functions.displayWinner(tender_id).call()
+    #     print(winning_address + " : " + score)
+    #     messagebox.showinfo("Assign Winner", "The winner of the tender has been appointed")
+    #     return web3.eth.accounts.index(winning_address)
+    # except Exception as e:
+    #     messagebox.showerror("Allowed Companies", str(e))
+    #     ##messagebox.showerror("Allowed Companies", str(e)+ " You might not have the permission to call this function or the Tender is not closed yet")
+
 
 
 
@@ -279,11 +294,17 @@ def send_bid(web3,contract, input_dict):
         tender_id=int(input_dict["tender id"].get())
         price=input_dict["price"].get()
         time=input_dict["time"].get()
-        envir=input_dict["environment"].get()
-        if int(envir) not in [1,2,3,4]:
-            messagebox.showerror("Error", "the variable environment has to be 1,2,3,4")
+        #envir=input_dict["environment"].get()
+        firmExp=input_dict["firm experience in field"].get();
+        pstn=input_dict["percent strength to needs"].get();
+        prevper=input_dict["previous performance"].get();
+
+        if int(pstn) not in range(0, 100):
+            messagebox.showerror("Error", "The percent strength to needs factor must be between 1 to 100.")
+        elif int(prevper) not in range(0, 101):
+            messagebox.showerror("Error", "The previous performance must be between 1 to 100.")
         else:
-            list_values_to_hash=[price,time,envir]
+            list_values_to_hash=[price,time,firmExp,pstn,prevper]
             unencrypted_message,separator=to_string_and_sep(list_values_to_hash)
             hash=encrypt(unencrypted_message)
 
