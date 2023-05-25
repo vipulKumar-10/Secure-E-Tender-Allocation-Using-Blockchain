@@ -90,15 +90,16 @@ contract TenderingSmartContract is PA {
     }
 
 
-    function CreateTender(string calldata _tenderName, string calldata _description,uint256 _daysUntilClosingDateData, uint256 _daysUntilClosingDateHash,
-                            string calldata _weights) external onlyPA{
-        string[] memory weights = SMT(_weights, '-');
-        uint sum = parseInt(weights[0]).add(parseInt(weights[1]).add(parseInt(weights[2]).add(parseInt(weights[5]))));
-        require(sum == 100, 'sum must be 100');
-        // new weight sum
-        uint sum2 = parseInt(weights[3]).add(parseInt(weights[4]));
-        require(sum2 == 100, 'Sum of two environment parameters must be 100');
+    function CreateTender(string calldata _tenderName, string calldata _description, uint256 _daysUntilClosingDateHash,uint256 _daysUntilClosingDateData,
+                            string calldata _weights) external onlyPA {                     
+        string memory temp = string(bytes.concat(bytes(_weights), " "));
+        string[] memory weights = SMT(temp, ' ');
 
+        uint sum = parseInt(weights[0]).add(parseInt(weights[1]).add(parseInt(weights[2]).add(parseInt(weights[5]))) );
+        require(sum == 100, "Sum of the four parameters should be 100");
+
+        uint sum2 = parseInt(weights[3]).add(parseInt(weights[4]));
+        require(sum2 == 100, "Sum of the two environment parameters should be 100");
         require(_daysUntilClosingDateData > _daysUntilClosingDateHash);
         
         Tender storage c = tenders[tenderKeys];
@@ -116,10 +117,10 @@ contract TenderingSmartContract is PA {
         c.evaluation_weights.push(parseInt(weights[4]));
         c.evaluation_weights.push(parseInt(weights[5]));
         tenderKeys ++;
-
-            }
+    }
 
     function placeBid (uint256 _tenderKey, bytes32 _hashOffer) external onlyFirm inTimeHash(_tenderKey) AlreadyPlacedBid(_tenderKey) {
+
         Tender storage c = tenders[_tenderKey];
 
         c.AlreadyBid[msg.sender] = true;
@@ -128,7 +129,6 @@ contract TenderingSmartContract is PA {
     
 
     function concludeBid(uint256 _tenderKey, string calldata _description, string calldata _separator) external onlyFirm inTimeData(_tenderKey) {
-
 
         require(tenders[_tenderKey].bids[msg.sender].contractor == msg.sender);
         require(keccak256(abi.encodePacked(_description)) == tenders[_tenderKey].bids[msg.sender].hashOffer);
@@ -152,14 +152,26 @@ contract TenderingSmartContract is PA {
     }
 
 
-    function parseInt(string memory _value) private pure returns (uint _ret) {
-        bytes memory _bytesValue = bytes(_value);
-        uint j = 1;
-        for(uint i = _bytesValue.length-1; i >= 0 && i < _bytesValue.length; i--) {
-            assert(uint8(_bytesValue[i]) >= 48 && uint8(_bytesValue[i]) <= 57);
-            _ret += (uint8(_bytesValue[i]) - 48)*j;
-            j*=10;
+    // function parseInt(string memory _value) private pure returns (uint _ret) {
+    //     bytes memory _bytesValue = bytes(_value);
+    //     uint j = 1;
+    //     for(uint i = _bytesValue.length-1; i >= 0 && i < _bytesValue.length; i--) {
+    //         assert(uint8(_bytesValue[i]) >= 48 && uint8(_bytesValue[i]) <= 57);
+    //         _ret += (uint8(_bytesValue[i]) - 48)*j;
+    //         j*=10;
+    //     }
+    // }
+
+    function parseInt(string memory s) private pure returns (uint) {
+        bytes memory b = bytes(s);
+        uint result = 0;
+        for (uint256 i = 0; i < b.length; i++) {
+            uint256 c = uint256(uint8(b[i]));
+            if (c >= 48 && c <= 57) {
+                result = result * 10 + (c - 48);
+            }
         }
+        return result;
     }
     
 
@@ -188,8 +200,8 @@ contract TenderingSmartContract is PA {
         uint adjustedExp = adjust_measures(_percentStrengthToNeeds, _firmExperience);
         uint envScore = w4.mul(adjustedExp);
         envScore = envScore.add(w5.mul(_percentStrengthToNeeds));
-
-        return envScore;
+        uint maxScore = 10000;
+        return (maxScore-envScore);
     }
 
     function getWeights(uint _tenderKey) private view returns(Weights memory) {
@@ -308,6 +320,8 @@ contract TenderingSmartContract is PA {
         return (tenders[_tenderKey].tender_id, tenders[_tenderKey].tenderName, tenders[_tenderKey].description, tenders[_tenderKey].evaluation_weights, _participants[_tenderKey].length, tenders[_tenderKey].winningContractor);
 
     }
+
+    
 
 }
 

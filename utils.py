@@ -51,16 +51,16 @@ def create_tender(web3,contract,input_dict_pa):
        description=input_dict_pa["description"].get()
        n_days_1=int(input_dict_pa["n seconds to send hash"].get())
        n_days_2=int(input_dict_pa["n seconds to send file"].get())
-       weights = str(input_dict_pa["weight price"].get()) + '-'
-       weights = weights + str(input_dict_pa["weight time"].get) + '-'
-       weights = weights + str(input_dict_pa["weight environment"].get) + '-'
-       weights = weights + str(input_dict_pa["weight firm experience"].get) + '-'
-       weights = weights + str(input_dict_pa["weight percent strength to needs"].get) + '-'
-       weights = weights + str(input_dict_pa["weight previous performance"].get)
+       weights = str(input_dict_pa["weight price"].get()) + ' '
+       weights = weights + str(input_dict_pa["weight time"].get()) + ' '
+       weights = weights + str(input_dict_pa["weight environment"].get()) + ' '
+       weights = weights + str(input_dict_pa["weight firm experience"].get()) + ' '
+       weights = weights + str(input_dict_pa["weight percent strength to needs"].get()) + ' '
+       weights = weights + str(input_dict_pa["weight previous performance"].get())
     #    weight_1_price=int(input_dict_pa["weight price"].get())
     #    weight_2_time=int(input_dict_pa["weight time"].get())
     #    weight_3_envir=int(input_dict_pa["weight environment"].get())
-       create_tender_solidity(web3,contract,tender_name,description,n_days_2,n_days_1,weights)
+       create_tender_solidity(web3,contract,tender_name,description,n_days_1,n_days_2,weights)
        messagebox.showinfo("Create Tender", "the function has been called successfully")
 	
    except Exception as e:
@@ -100,7 +100,7 @@ def assign_winner(web3,contract,input_dict):
     contract.functions.compute_scores(tender_id).transact()
     contract.functions.assign_winner(tender_id).transact()
     winning_address,score=contract.functions.displayWinner(tender_id).call()
-    print(winning_address + " : " + score)
+    print(winning_address + " : " + str(score))
     messagebox.showinfo("Assign Winner", "The winner of the tender has been appointed")
     return web3.eth.accounts.index(winning_address)
     # try:
@@ -143,6 +143,10 @@ def get_tenders_status(web3,contract):
    df["price weight"]=df["weights"].apply(lambda x: x[0])
    df["time weight"]=df["weights"].apply(lambda x: x[1])
    df["environment weight"]=df["weights"].apply(lambda x: x[2])
+
+   ## new 
+   df["previous performance weight"]=df["weights"].apply(lambda x: x[5])
+
    df.drop('weights', inplace=True, axis=1)
    return df
   
@@ -249,8 +253,10 @@ def get_bids_details(web3,contract,input_dict):
             df["account"]=df["address"].apply(lambda x: dict_address[x])
             df["price"]=df["description"].apply(lambda x: x[0])
             df["time"]=df["description"].apply(lambda x: x[1])
-            df["environment"]=df["description"].apply(lambda x: x[2])
-            df=df[["account","separator used","price","time","environment","score","winner?"]]
+            df["firm experience"]=df["description"].apply(lambda x: x[2])
+            df["%needToStrength"]=df["description"].apply(lambda x: x[3])
+            df["previous performance"]=df["description"].apply(lambda x: x[4])
+            df=df[["account","price","time","firm experience", "%needToStrength","previous performance","score","winner?"]]
             df.sort_values(by="score",ascending=True,inplace=True)
             input_dict['tv1']["column"] = list(df.columns)
             for column in input_dict['tv1']["column"]:
@@ -402,6 +408,7 @@ def send_bid_solidity(web3,contract,tender_id,hash):
    --------------
    nothing, executes the solidity function
    """
+   ##print(hash)
    contract.functions.placeBid(int(tender_id),hash).transact()
 
 def save_txt(web3,user_id,separator,unencrypted_message,tender_id):
@@ -452,6 +459,7 @@ def send_unencrypted_solidity(web3,contract,tender_id, unencrypted_message,separ
    --------------
    nothing, executes the solidity function
    """
+   ##print(unencrypted_message)
    contract.functions.concludeBid(int(tender_id),unencrypted_message,separator).transact()
     
 
