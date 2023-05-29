@@ -1,3 +1,2 @@
-# Tender_Allocation
+# Project (PCSE 23-36)
 
-Tender Allocation using blockchain.
