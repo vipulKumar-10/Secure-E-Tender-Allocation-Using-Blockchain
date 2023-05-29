@@ -3,7 +3,7 @@ Step 1: First download and install latest version of python from https://www.pyt
 Step 2: Download and install vs code from https://code.visualstudio.com/download.
 Step 3: Download Ganache from https://trufflesuite.com/ganache/.
 Step 4: Fork this project from this repository using git command git clone https://github.com/vipulKumar-10/Secure-E-Tender-Allocation-Using-Blockchain.git.
-Step 5: Open the project folder in vs code.
+Step 5: Open the Source Code folder in vs code.
 Step 6: Download Ethereum Remix and python extension from vs code.
 Step 7: Opnen Ganache and click on Quick Start.
 Step 8: Open Tendering.sol file.
