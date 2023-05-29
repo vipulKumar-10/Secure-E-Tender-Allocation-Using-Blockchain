@@ -1,0 +1,16 @@
+Follow the below steps to run this project on any system:
+Step 1: First download and install latest version of python from https://www.python.org/downloads/.
+Step 2: Download and install vs code from https://code.visualstudio.com/download.
+Step 3: Download Ganache from https://trufflesuite.com/ganache/.
+Step 4: Fork this project from this repository using git command git clone https://github.com/vipulKumar-10/Secure-E-Tender-Allocation-Using-Blockchain.git.
+Step 5: Open the project folder in vs code.
+Step 6: Download Ethereum Remix and python extension from vs code.
+Step 7: Opnen Ganache and click on Quick Start.
+Step 8: Open Tendering.sol file.
+Step 9: Open remix extension and click on compiler and then click on tendering.sol.
+Step 10: Click on run and deploy in remix.
+Step 11: Copy RPC Server from ganache and paste it into run and deploy tab and click connect.
+Step 12: Scroll down on run and deploy and press deploy button.
+Step 13: Copy the deployed contract address and paste that into config.py file in address variable and save the file.
+Step 14: Open main.py file and run that file.
+Step 15: Now an interface will open using which you can interact with the tender (create and deploy tenders etc.).
